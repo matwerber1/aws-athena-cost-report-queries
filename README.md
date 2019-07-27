@@ -4,6 +4,19 @@ Amazon Athena SQL queries to summarize and explore your detailed cost reports.
 
 Example screenshots show the Athena results downloaded as CSV within Microsoft Excel, otherwise unmodified. 
 
+## Enabling Cost and Usage Reports for Amazon Athena
+
+Amazon Athena is a serverless Presto environment that you may use to run SQL queries directly on objects in Amazon S3. 
+
+You can use Athena to quickly query and explore your AWS costs, but you must first enable AWS Cost and Usage Reports to export to Amazon S3. 
+
+To enable these reports, navigate to [AWS Cost and Usage Reports Console](https://console.aws.amazon.com/billing/home#/reports) and click **Create report**. 
+
+To learn more about these reports, visit the link below:
+https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/billing-reports-costusage-files.html
+
+By enabling a cost report and choosing the option to **Enable report data integration for Amazon Athena**, AWS will output cost reports to the S3 bucket of your choice and also create an AWS Glue crawler to periodically crawl the bucket and catalog new reports to a cost table maintained in the Glue catalog. Once the data is catalogued, you can easily query the data using queries like those shown below. 
+
 ## Total cost by service and line-item, last 30 days
 
 ```sql
