@@ -1,10 +1,20 @@
-# aws-athena-cost-billing-queries
+# Amazon Athena SQL Queries
 
-Amazon Athena SQL queries to summarize and explore your detailed cost reports. 
+## Partitions
 
-Example screenshots show the Athena results downloaded as CSV within Microsoft Excel, otherwise unmodified. 
+### View Table Partitions
 
-## Enabling Cost and Usage Reports for Amazon Athena
+```sql
+SELECT *
+FROM information_schema.__internal_partitions__
+WHERE table_schema = '<DATABASE_NAME>'
+        AND table_name = '<TABLE_NAME>'
+ORDER BY partition_value
+```
+
+## Cost & Usage
+
+### Enabling Cost and Usage Reports for Amazon Athena
 
 Amazon Athena is a serverless Presto environment that you may use to run SQL queries directly on objects in Amazon S3. 
 
@@ -17,7 +27,7 @@ https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/billing-reports-cos
 
 By enabling a cost report and choosing the option to **Enable report data integration for Amazon Athena**, AWS will output cost reports to the S3 bucket of your choice and also create an AWS Glue crawler to periodically crawl the bucket and catalog new reports to a cost table maintained in the Glue catalog. Once the data is catalogued, you can easily query the data using queries like those shown below. 
 
-## Total cost by service and line-item, last 30 days
+### Total cost by service and line-item, last 30 days
 
 ```sql
 SELECT product_region                       AS region,
@@ -38,7 +48,7 @@ ORDER BY  blended_cost DESC;
 
 ![alt text](images/cost-by-service-and-line-item-last-30-days.png)
 
-## Total cost by resource ID, last 30 days
+### Total cost by resource ID, last 30 days
 
 Want to know how much a specific resource ID (e.g. EC2 instance, EBS volume, load balancer, etc.) is costing you? You can use this report *if* you have enabled resource IDs in your cost report. Note that enabling resource IDs may significantly increase the storage size of your cost reports in S3:
 
