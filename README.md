@@ -94,5 +94,6 @@ SELECT day,
          round(cost - prior_cost,
         2) AS cost_change
 FROM precomputed
+ORDER BY day DESC
 ```
 
