@@ -76,8 +76,18 @@ ORDER BY  blended_cost DESC;
 In the query below, note that: 
 
 * Costs are summarized according to region, service, and day
+
 * `interval '10'` in the first CTE controls how many days we're looking back. 
-* The `total_period_cost` represents the total cost of the particular service and region for the `interval` you specified (**not** the current month/year, as is often implied by the term "current period")
+
+* Because the source data from the Cost Report might be not have data for a particular region/service/day combination, the `prior_cost` in the SQL below does **not** mean the prior day's cost. It instead means the prior cost of the most recent day for a particular region/service/day. 
+
+** For example, imagine that we used EC2 on Jan 1st and 2nd and Jan 10th for $10, $8, and $6, respectively. The results you see would be:  
+
+        ```
+        day         service       cost       previous_cost
+        1/1/2019     EC2           $10        <null>
+        1/2/2019     EC2           $8         $10
+        1/10/2019    EC2           $6         $8
 
 ```
 with detail AS (
@@ -89,7 +99,7 @@ with detail AS (
   FROM 
     hourly_cost_for_athena
   WHERE 
-    line_item_usage_start_date >= (CURRENT_DATE - interval '10' day)
+    line_item_usage_start_date >= (CURRENT_DATE - interval '20' day)
   GROUP BY 
     product_region,
     product_product_name,
@@ -102,8 +112,7 @@ precomputed AS (
     aws_service,
     day,
     day_cost,
-    lag(day_cost,1) OVER (PARTITION BY aws_service, region ORDER BY day desc) AS prior_day_cost,
-    round(sum(day_cost) OVER (partition by region, aws_service),2) as total_period_cost
+    lag(day_cost,1) OVER (PARTITION BY aws_service, region ORDER BY day desc) AS prior_cost
   FROM 
     detail
   GROUP BY  
@@ -117,13 +126,10 @@ SELECT
   aws_service,
   day,
   day_cost,
-  prior_day_cost,
-  round(day_cost - prior_day_cost, 2) AS cost_change,
-  total_period_cost
+  prior_cost,
+  round(day_cost - prior_cost, 2) AS change_from_prior
 FROM 
   precomputed
-WHERE
-  day_cost <> 0 and prior_day_cost <> 0
 ORDER BY 
   region, 
   aws_service,
