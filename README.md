@@ -113,7 +113,7 @@ precomputed AS (
     aws_service,
     day,
     day_cost,
-    lag(day_cost,1) OVER (PARTITION BY aws_service, region ORDER BY day desc) AS prior_cost
+    lag(day_cost,1) OVER (PARTITION BY aws_service, region ORDER BY day ASC) AS prior_cost
   FROM 
     detail
   GROUP BY  
