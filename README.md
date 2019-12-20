@@ -71,3 +71,28 @@ ORDER BY  blended_cost DESC;
 
 ![alt text](images/cost-by-resource-id-last-30-days.png)
 
+### Cost by day, with change from prior day
+
+```
+with detail AS 
+    (SELECT CAST(line_item_usage_start_date AS DATE) AS day,
+         round(sum(line_item_blended_cost),
+        2) AS cost
+    FROM hourly_cost_for_athena
+    WHERE line_item_usage_start_date >= (CURRENT_DATE - interval '30' day)
+    GROUP BY  CAST(line_item_usage_start_date AS DATE) ) ,precomputed AS 
+    (SELECT day,
+         cost,
+         lag(cost,
+         1)
+        OVER (ORDER BY day) AS prior_cost
+    FROM detail
+    GROUP BY  DAY, COST )
+SELECT day,
+         cost,
+         prior_cost,
+         round(cost - prior_cost,
+        2) AS cost_change
+FROM precomputed
+```
+
