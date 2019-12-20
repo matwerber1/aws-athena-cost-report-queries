@@ -74,26 +74,48 @@ ORDER BY  blended_cost DESC;
 ### Cost by day, with change from prior day
 
 ```
-with detail AS 
-    (SELECT CAST(line_item_usage_start_date AS DATE) AS day,
-         round(sum(line_item_blended_cost),
-        2) AS cost
-    FROM hourly_cost_for_athena
-    WHERE line_item_usage_start_date >= (CURRENT_DATE - interval '30' day)
-    GROUP BY  CAST(line_item_usage_start_date AS DATE) ) ,precomputed AS 
-    (SELECT day,
-         cost,
-         lag(cost,
-         1)
-        OVER (ORDER BY day) AS prior_cost
-    FROM detail
-    GROUP BY  DAY, COST )
-SELECT day,
-         cost,
-         prior_cost,
-         round(cost - prior_cost,
-        2) AS cost_change
-FROM precomputed
-ORDER BY day DESC
+with detail AS (
+  SELECT 
+    product_region as region, 
+    CAST(line_item_usage_start_date AS DATE) AS day,
+    product_product_name AS service,
+    round(sum(line_item_blended_cost),2) AS cost
+  FROM 
+    hourly_cost_for_athena
+  WHERE 
+    line_item_usage_start_date >= (CURRENT_DATE - interval '10' day)
+  GROUP BY 
+    CAST(line_item_usage_start_date AS DATE),
+    product_region,
+    product_product_name
+),
+precomputed AS (
+  SELECT 
+    region, 
+    day,
+    service,
+    cost,
+    lag(cost,1) OVER (PARTITION BY service, region ORDER BY day desc) AS prior_cost
+  FROM 
+    detail
+  GROUP BY  
+    region,
+    day, 
+    service, 
+    cost
+)
+SELECT 
+  region
+  service,
+  day,
+  cost,
+  prior_cost,
+  round(cost - prior_cost, 2) AS cost_change
+FROM 
+  precomputed
+ORDER BY 
+  region, 
+  service,
+  day DESC
 ```
 
