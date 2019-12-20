@@ -137,3 +137,6 @@ ORDER BY
   day DESC
 ```
 
+**Example:**
+![alt text](images/daily-cost-change.png)
+
