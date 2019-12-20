@@ -73,49 +73,60 @@ ORDER BY  blended_cost DESC;
 
 ### Cost by day, with change from prior day
 
+In the query below, note that: 
+
+* Costs are summarized according to region, service, and day
+* `interval '10'` in the first CTE controls how many days we're looking back. 
+* The `total_period_cost` represents the total cost of the particular service and region for the `interval` you specified (**not** the current month/year, as is often implied by the term "current period")
+
 ```
 with detail AS (
   SELECT 
     product_region as region, 
+    product_product_name AS aws_service,
     CAST(line_item_usage_start_date AS DATE) AS day,
-    product_product_name AS service,
-    round(sum(line_item_blended_cost),2) AS cost
+    round(sum(line_item_blended_cost),2) AS day_cost
   FROM 
     hourly_cost_for_athena
   WHERE 
     line_item_usage_start_date >= (CURRENT_DATE - interval '10' day)
   GROUP BY 
-    CAST(line_item_usage_start_date AS DATE),
     product_region,
-    product_product_name
+    product_product_name,
+    CAST(line_item_usage_start_date AS DATE)
+    
 ),
 precomputed AS (
   SELECT 
     region, 
+    aws_service,
     day,
-    service,
-    cost,
-    lag(cost,1) OVER (PARTITION BY service, region ORDER BY day desc) AS prior_cost
+    day_cost,
+    lag(day_cost,1) OVER (PARTITION BY aws_service, region ORDER BY day desc) AS prior_day_cost,
+    round(sum(day_cost) OVER (partition by region, aws_service),2) as total_period_cost
   FROM 
     detail
   GROUP BY  
     region,
+    aws_service, 
     day, 
-    service, 
-    cost
+    day_cost
 )
 SELECT 
-  region
-  service,
+  region,
+  aws_service,
   day,
-  cost,
-  prior_cost,
-  round(cost - prior_cost, 2) AS cost_change
+  day_cost,
+  prior_day_cost,
+  round(day_cost - prior_day_cost, 2) AS cost_change,
+  total_period_cost
 FROM 
   precomputed
+WHERE
+  day_cost <> 0 and prior_day_cost <> 0
 ORDER BY 
   region, 
-  service,
+  aws_service,
   day DESC
 ```
 
