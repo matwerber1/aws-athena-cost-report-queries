@@ -81,14 +81,16 @@ In the query below, note that:
 
 * Because the source data from the Cost Report might be not have data for a particular region/service/day combination, the `prior_cost` in the SQL below does **not** mean the prior day's cost. It instead means the prior cost of the most recent day for a particular region/service/day. 
 
-	** For example, imagine that we used EC2 on Jan 1st and 2nd and Jan 10th for $10, $8, and $6, respectively. The  results you see would be:  
+	 For example, imagine that we used EC2 on Jan 1st and 2nd and Jan 10th for $10, $8, and $6, respectively. The  results you see would be:  
 
-	```
-	day         service       cost       previous_cost
-	1/1/2019     EC2           $10        <null>
-	1/2/2019     EC2           $8         $10
-	1/10/2019    EC2           $6         $8
-	```
+    ```
+    day         service       cost       previous_cost
+    1/1/2019     EC2           $10        <null>
+    1/2/2019     EC2           $8         $10
+    1/10/2019    EC2           $6         $8
+    ```
+
+    If you want "prior cost" to literally be the prior day, even if that row does not exist (because it was zero), you'll have to "backfill" the detail CTE for missing rows. [Filling in Data Potholes with Recursive CTEs (by Kendra Little)](https://littlekendra.com/2010/12/23/mindthegap/) explains possible ways to do this. 
 
 ```
 with detail AS (
