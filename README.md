@@ -1,5 +1,9 @@
 # Amazon Athena SQL Queries
 
+## Want Athena SQL Help? 
+
+If you'd like help writing an Athena SQL query to analyze **native** AWS data (e.g. VPC flow logs, CloudTrail logs, cost reports, etc.), open an issue on this repo and I'll try to help when I have time.
+
 ## Partitions
 
 ### View Table Partitions
