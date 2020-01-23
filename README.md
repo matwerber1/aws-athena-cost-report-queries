@@ -65,7 +65,7 @@ SELECT CAST(min(line_item_usage_start_date) AS date)    AS start_date,
        round(sum(line_item_blended_cost),0) AS blended_cost,
        count(*)                             AS records
 FROM     hourly_cost_for_athena
-WHERE    line_item_usage_start_date >= (CURRENT_DATE - interval '3' day)
+WHERE    line_item_usage_start_date >= (CURRENT_DATE - interval '30' day)
 GROUP BY product_product_name,
          product_region, 
          line_item_resource_id
