@@ -154,6 +154,7 @@ Note - this is only for standard EC2 instances. It doesn't include other service
 SELECT year, 
        month,
        product_region as "region",
+       product_servicecode as "service",
        product_instance_type as "instance_type",
        product_operating_system as "OS",
        product_tenancy as "tenancy",
@@ -163,16 +164,18 @@ WHERE    year = '2020' and month in ('1','2','3')
          and line_item_blended_cost <> 0
          and pricing_unit = 'Hrs'
          and product_product_family = 'Compute Instance'
+         and product_servicecode = 'AmazonEC2'
 GROUP BY
-    year, 
-    month,
-    product_region,
-    product_instance_type,
-    product_operating_system,
-    product_tenancy
+year, 
+month,
+product_region,
+product_instance_type,
+product_operating_system,
+product_tenancy,
+product_servicecode
 ORDER BY
-    year desc,
-    month desc,
-    region,
-    instance_type
+   year desc,
+   month desc,
+   region,
+   instance_type
 ```
