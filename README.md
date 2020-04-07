@@ -146,3 +146,33 @@ ORDER BY
 **Example:**
 ![alt text](images/daily-cost-change.png)
 
+### Number of EC2 Instance Hours Consumed during a Given Period, by Instance Type and Region
+
+Note - this is only for standard EC2 instances. It doesn't include other services that use EC2 (e.g. ElastiCache, RDS, etc.):
+
+```
+SELECT year, 
+       month,
+       product_region as "region",
+       product_instance_type as "instance_type",
+       product_operating_system as "OS",
+       product_tenancy as "tenancy",
+       sum(line_item_usage_amount) as "hours"
+FROM     hourly_cost_for_athena
+WHERE    year = '2020' and month in ('1','2','3')
+         and line_item_blended_cost <> 0
+         and pricing_unit = 'Hrs'
+         and product_product_family = 'Compute Instance'
+GROUP BY
+    year, 
+    month,
+    product_region,
+    product_instance_type,
+    product_operating_system,
+    product_tenancy
+ORDER BY
+    year desc,
+    month desc,
+    region,
+    instance_type
+```
