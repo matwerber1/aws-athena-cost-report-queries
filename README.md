@@ -179,3 +179,35 @@ ORDER BY
    region,
    instance_type
 ```
+
+### Cost by Lambda Function, by Month:
+
+```
+SELECT year, 
+       month, 
+       bill_invoice_id, 
+       line_item_usage_account_id, 
+       product_region, 
+       line_item_resource_id, 
+       line_item_usage_type, 
+       product_group, 
+       line_item_product_code, 
+       line_item_line_item_description, 
+       Sum(line_item_usage_amount)   AS usage_amount, 
+       pricing_public_on_demand_rate AS price_per_unit, 
+       round(Sum(line_item_blended_cost),2)   AS total_cost 
+FROM   hourly_cost_for_athena 
+WHERE  year = '2019' 
+       AND line_item_product_code = 'AWSLambda' 
+GROUP  BY year, 
+          month, 
+          bill_invoice_id, 
+          line_item_usage_account_id, 
+          product_region, 
+          line_item_resource_id, 
+          line_item_usage_type, 
+          product_group, 
+          line_item_product_code, 
+          line_item_line_item_description, 
+          pricing_public_on_demand_rate 
+```
