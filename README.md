@@ -1,8 +1,5 @@
 # Amazon Athena SQL Queries
 
-## Want Athena SQL Help? 
-
-If you'd like help writing an Athena SQL query to analyze **native** AWS data (e.g. VPC flow logs, CloudTrail logs, cost reports, etc.), open an issue on this repo and I'll try to help when I have time.
 
 ## Partitions
 
@@ -210,4 +207,33 @@ GROUP  BY year,
           line_item_product_code, 
           line_item_line_item_description, 
           pricing_public_on_demand_rate 
+```
+
+### Free-tier usage in last 30 days:
+
+```sql
+SELECT 
+  line_item_product_code AS product ,
+  line_item_operation AS operation ,
+  line_item_usage_account_id AS account ,
+  line_item_line_item_description AS billing_description,
+  pricing_unit ,
+  round(SUM(line_item_usage_amount),3) AS usage_quantity
+  
+FROM hourly_cost_athena
+
+WHERE
+  line_item_unblended_rate = '0.0000000000'
+  AND line_item_usage_start_date >= (CURRENT_DATE - interval '30' day)
+  
+GROUP BY  
+  line_item_usage_account_id , 
+  line_item_product_code , 
+  line_item_operation , 
+  pricing_unit ,
+  line_item_line_item_description
+  
+HAVING SUM(line_item_usage_amount) > 0 
+
+ORDER BY product, operation
 ```
