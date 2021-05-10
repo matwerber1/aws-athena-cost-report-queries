@@ -211,6 +211,10 @@ GROUP  BY year,
 
 ### Free-tier usage in last 30 days:
 
+Query below shows any items where the price per unit is zero.
+
+Alternatively, you might try `lower(line_item_line_item_description) LIKE '%free%'`, not sure if one is better over the other or how consistently the word "free" appears in free-tier line items. 
+
 ```sql
 SELECT 
   line_item_product_code AS product ,
